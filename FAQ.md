@@ -1,5 +1,18 @@
-https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_norm.py#L83-L84
+https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_norm.py#L83-L84 :
 
-`rscript += "write.table(rnaseq_sig, file='{2}/{0}_vs_{1}_deseq2_significant.tsv', sep='\\t', quote=F)\n".format(cond1, cond2, outdir)`
+ * Is this running DESeq on the ATAC-seq reads? Only using it for the
+ normalisation right?
+ * Why save the results from DESeq if this was only used to get the PCA?
 
-`rscript += "write.table(rnaseq_res, file='{2}/{0}_vs_{1}_deseq2_analysis.tsv', sep='\\t', quote=F)\n".format(cond1, cond2, outdir)`
+https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_norm.py#L94 :
+
+ * What is featureCounts? Why do you keep only counts[,6:ncol(counts)]? What are
+ the columns 1:5?
+
+https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_norm.py#L116 :
+
+ * What file is this documented in?
+
+https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_norm.py#L94 :
+ 
+ * What and why needs to be changed?
