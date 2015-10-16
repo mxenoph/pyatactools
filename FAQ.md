@@ -2,17 +2,24 @@ https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_norm.py#L83-
 
  * Is this running DESeq on the ATAC-seq reads? Only using it for the
  normalisation right?
+This function is not fully functional. I was testing different normalisation strategies such as CQN normalisation. 
  * Why save the results from DESeq if this was only used to get the PCA?
-
+Legacy code, I copied this from another function, ignore this. In fact this entire function is not important
 https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_norm.py#L94 :
 
  * What is featureCounts? Why do you keep only counts[,6:ncol(counts)]? What are
  the columns 1:5?
+FeatureCounts is an alternative to htseq-count and part of the subread package: http://subread.sourceforge.net/
+It is much faster than htseq-counts, the first 5 columns contain some unimportant information about the counted features
 
 https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_norm.py#L116 :
 
  * What file is this documented in?
-
+Its copied from another package, from this package:
+https://github.com/pdl30/pyrnatools 
+And an example of the config:
+https://github.com/pdl30/pyrnatools/blob/master/Configuration_examples/example_config.ini
 https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_norm.py#L94 :
- 
+ I don't think this script is useful/necessary for you.
  * What and why needs to be changed?
+Dosen't matter, I was looking into better ways of running this script so that I could parallelise multiple comparisons, I never got around to it. My comments leave alot to be desired.
