@@ -32,11 +32,12 @@ import tempfile
 #	size = reduce(lambda x, y: x + y, [ int(l.rstrip('\n').split('\t')[2]) for l in pysam.flagstat(bam) ])
 #	return size
 
-def sam_size(bam):
+def sam_size(bam):# {{{
+        # -F 4 excludes reads that are unmapped. Command counts the mapped reads in the bam
 	command = "samtools view -c -F 4 {}".format(bam)
 	proc = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
 	out = proc.communicate()[0]
-	return int(out.upper())
+	return int(out.upper())# }}}
 
 def read_tss_pysam(bam, position_dict, halfwinwidth, norm, return_dict):
 	profile = numpy.zeros( 2*halfwinwidth, dtype="f" )
@@ -44,9 +45,12 @@ def read_tss_pysam(bam, position_dict, halfwinwidth, norm, return_dict):
 		constant = 1e-6/float(norm[bam])
 	else:
 		constant = 1e-6/float(sam_size(bam))
+        # Open BAM file. "rb" specifies that we are reading the file and that it's compressed/binary
 	samfile = pysam.Samfile(bam, "rb")
+        # Defaultdict (like dict() but ) calls a factory function to supply missing values
 	aggreagated_cvg = collections.defaultdict(int)
-	count =0 
+	count =0
+        # Iterate through TSS in dictionary and calculate coverage over window with pileup()
 	for chrom, tss, strand in position_dict.values():
 		count += 1
 		coverage = {}

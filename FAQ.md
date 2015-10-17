@@ -16,3 +16,7 @@ https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_norm.py#L116
 https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_norm.py#L94 :
  
  * What and why needs to be changed?
+
+https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#L61 :
+
+ * I don't understand why calculate the coverage on a single base here.
