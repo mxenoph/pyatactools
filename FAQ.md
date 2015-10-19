@@ -47,6 +47,8 @@ https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#
 
  * What's mRNA_len_cut?
 
+ Filter out genes smaller than 100bp.
+
 https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#L162-170 :
  
  * Don't understand why leaving a 10bp gap between the 1kb upstream the TSS and
