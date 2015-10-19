@@ -38,14 +38,19 @@ https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#
  * tmp1 is a dictionary of sorted positions (keys) covered by reads (values is the coverage). Aggreagated_cvg is the coverage at those poisitions over all TSSs.
  Why multiply by 10000? 
 
+ * No major reason, to make the values on the plots easier to read
+
 https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#L127 :
 
  * Obviously this is not a GTF file otherewise the name wouldn't be the first
  field. What format is the annotation file?
 
+ * This is the format found in the data directory i.e. https://github.com/mxenoph/pyatactools/blob/master/pyatactools/data/mm10_ensembl_80.txt
+
 https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#L135 :
 
  * What's mRNA_len_cut?
+ * If the mRNA is less than 100bp in length, then it is not included in the genebody plot
 
  Filter out genes smaller than 100bp.
 
@@ -53,7 +58,9 @@ https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#
  
  * Don't understand why leaving a 10bp gap between the 1kb upstream the TSS and
  10bp after the TTS.
+ * Can't remember the reason for this but it has something to do with plotting. Feel free to look further into this
 
 https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#L165 :
 
  * shouldn't it be `if before < 0`
+ * Are you sure this is the right line? Don't know what you are referring to.
