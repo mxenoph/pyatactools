@@ -30,3 +30,4 @@ I don't think this script is useful/necessary for you.
 https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#L61 :
 
  * I don't understand why calculate the coverage on a single base here.
+   Its to test if the chromosome exists, not to do any coverage counting
