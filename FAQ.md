@@ -31,6 +31,8 @@ https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#
 
  * I don't understand why calculate the coverage on a single base here.
 
+Its to test if the chromosome exists, not to do any coverage counting
+
 https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#L88 :
 
  * tmp1 is a dictionary of sorted positions (keys) covered by reads (values is the coverage). Aggreagated_cvg is the coverage at those poisitions over all TSSs.
