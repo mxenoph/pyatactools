@@ -92,6 +92,7 @@ def write_deseq(ifile, sample_dict, cond1, cond2, padj, f, outdir, gc_file, tmpd
 	return rscript
 
 def get_cqn(ifile, sample_dict, f, outfile, gc_file, tmpdesign):
+        # Creates an rscript that quantile normalises the counts with CQN from bioconductor
 	print "==> Running differental expression analysis...\n"
 	rscript =  "suppressMessages(library(cqn)); suppressMessages(library(scales))\n"
 	rscript += "pdata <- read.table('{}', header=T)\n".format(tmpdesign)
