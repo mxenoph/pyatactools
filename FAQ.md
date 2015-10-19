@@ -30,3 +30,26 @@ I don't think this script is useful/necessary for you.
 https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#L61 :
 
  * I don't understand why calculate the coverage on a single base here.
+
+https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#L88 :
+
+ * tmp1 is a dictionary of sorted positions (keys) covered by reads (values is the coverage). Aggreagated_cvg is the coverage at those poisitions over all TSSs.
+ Why multiply by 10000? 
+
+https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#L127 :
+
+ * Obviously this is not a GTF file otherewise the name wouldn't be the first
+ field. What format is the annotation file?
+
+https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#L135 :
+
+ * What's mRNA_len_cut?
+
+https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#L162-170 :
+ 
+ * Don't understand why leaving a 10bp gap between the 1kb upstream the TSS and
+ 10bp after the TTS.
+
+https://github.com/mxenoph/pyatactools/blob/mx-dev/pyatactools/atac_profiler.py#L165 :
+
+ * shouldn't it be `if before < 0`
