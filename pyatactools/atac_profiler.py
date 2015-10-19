@@ -39,7 +39,7 @@ def sam_size(bam):# {{{
 	out = proc.communicate()[0]
 	return int(out.upper())# }}}
 
-def read_tss_pysam(bam, position_dict, halfwinwidth, norm, return_dict):
+def read_tss_pysam(bam, position_dict, halfwinwidth, norm, return_dict):# {{{
 	profile = numpy.zeros( 2*halfwinwidth, dtype="f" )
 	if norm:
 		constant = 1e-6/float(norm[bam])
@@ -63,8 +63,11 @@ def read_tss_pysam(bam, position_dict, halfwinwidth, norm, return_dict):
 			continue
 		for i in range(1, 2*halfwinwidth):
 			coverage[i] = 0.0
+                # By default, the samtools pileup engine outputs all reads overlapping a region. 
+                # If truncate is True and a region is given, only columns in the exact region specificied are returned.
 		for pileupcolumn in samfile.pileup(chrom, chrom_start, chrom_end, truncate=True):
 			#ref_pos = pileupcolumn.pos
+                        # Get orientation right
 			if strand == "+":
 				ref_pos = pileupcolumn.pos - chrom_start
 			elif strand == "-":
@@ -76,29 +79,33 @@ def read_tss_pysam(bam, position_dict, halfwinwidth, norm, return_dict):
 				if pileupread.alignment.is_secondary:continue 
 				if pileupread.alignment.is_unmapped:continue
 				if pileupread.alignment.is_duplicate:continue
+                                # Count only reads that pass qc, are not duplicates etc
 				cover_read += constant
 			coverage[ref_pos] = cover_read
 		tmp1 = [coverage[k] for k in sorted(coverage)]
 
+                # Don't quite get what's going on here
 		for i in range(0,len(tmp1)):
 			aggreagated_cvg[i] += tmp1[i]*10000
 
+        # divide by the number of features/TSS (count)
 	for key in aggreagated_cvg:
 		profile[key] = aggreagated_cvg[key]/float(count)
-	return_dict[bam] = profile
+	return_dict[bam] = profile# }}}
 
 def read_tss_function(args):
 	return read_tss_pysam(*args)
 def read_gene_function(args):
 	return genebody_coverage(*args)
 
-def genebody_percentile(anno, gene_filter, mRNA_len_cut = 100):
+def genebody_percentile(anno, gene_filter, mRNA_len_cut = 100):# {{{
 	'''
 	return percentile points of gene body
 	mRNA length < mRNA_len_cut will be skipped
 	'''
 	g_percentiles = {}
 	g_filter = []
+        # Reads gene name per line from file and add to g_filter tuple
 	if gene_filter:
 		with open(gene_filter) as f:
 			for line in f:
@@ -117,7 +124,8 @@ def genebody_percentile(anno, gene_filter, mRNA_len_cut = 100):
 			continue
 		tx_start  = int( fields[2] )
 		tx_end = int( fields[3] )
-		geneName      = fields[0]
+                # This is not a GTF. What is it?
+		geneName = fields[0]
 		if fields[4] == "1":
 			strand = "+"
 		else:
@@ -134,10 +142,11 @@ def genebody_percentile(anno, gene_filter, mRNA_len_cut = 100):
 			gene_all_base.extend(range(tx_start+1,tx_end+1))		#1-based coordinates on genome
 			if len(gene_all_base) < mRNA_len_cut:
 				continue
+                        # function percentile_list from rseqc
 			g_percentiles[geneID] = (chrom, strand, mystat.percentile_list (gene_all_base))	#get 100 points from each gene's coordinates
-	return g_percentiles
+	return g_percentiles# }}}
 
-def genebody_coverage(bam, position_list, norm, return_dict):
+def genebody_coverage(bam, position_list, norm, return_dict):# {{{
 	'''
 	position_list is dict returned from genebody_percentile
 	position is 1-based genome coordinate
@@ -151,13 +160,15 @@ def genebody_coverage(bam, position_list, norm, return_dict):
 	
 	gene_finished = 0
 	for chrom, strand, positions in position_list.values():
+                # why subtracting 1011?
 		before = positions[0]-1011
-		if before ==0:
+		if before < 0:
 			before = 0
 		after = positions[-1] + 1000
 		before_list = range(before, positions[0]-1-10, 10)
 		after_list = range(positions[-1]+10, after+10, 10)
 		new_positions = before_list + positions + after_list
+                # continue to next gene if not 300 bins.
 		if len(new_positions) != 300:
 			continue
 		coverage = {}
@@ -188,6 +199,7 @@ def genebody_coverage(bam, position_list, norm, return_dict):
 			coverage[ref_pos] = cover_read		
 		tmp = [coverage[k] for k in sorted(coverage)]
 
+                # Reverse the tuple to get the orientation right for genes on the - strand
 		if strand == '-':
 			tmp = tmp[::-1]
 		for i in range(0,len(tmp)):
@@ -195,11 +207,12 @@ def genebody_coverage(bam, position_list, norm, return_dict):
 		gene_finished += 1
 		
 	tmp3 = numpy.zeros( 300, dtype='f' ) 
+        # Dividing by the number of genes
 	for key in aggreagated_cvg:
 		tmp3[key] = aggreagated_cvg[key]/float(len(position_list.keys()))
-	return_dict[bam] = tmp3
+	return_dict[bam] = tmp3# }}}
 
-def read_tss_anno(anno, gene_filter):
+def read_tss_anno(anno, gene_filter):# {{{
 	positions = {}
 	g_filter = []
 	if gene_filter:
@@ -232,9 +245,9 @@ def read_tss_anno(anno, gene_filter):
 					positions[word[0]] = (chrom, int(word[2]), strand)
 				elif strand == "-":
 					positions[word[0]] = (chrom, int(word[3]), strand)
-	return positions
+	return positions# }}}
 
-def plot_tss_profile(conditions, anno, halfwinwidth, gene_filter, threads, comb, outname, norm):
+def plot_tss_profile(conditions, anno, halfwinwidth, gene_filter, threads, comb, outname, norm):# {{{
 	halfwinwidth = int(halfwinwidth)
 	positions = read_tss_anno(anno, gene_filter)
 	fname = None
@@ -272,9 +285,9 @@ def plot_tss_profile(conditions, anno, halfwinwidth, gene_filter, threads, comb,
 			pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), return_dict[key], label=conditions[key])
 		pyplot.legend(prop={'size':8})
 		pyplot.savefig(outname+".pdf")
-		pyplot.close()
+		pyplot.close()# }}}
 
-def plot_genebody_profile(conditions, anno, gene_filter, threads, comb, outname, norm):
+def plot_genebody_profile(conditions, anno, gene_filter, threads, comb, outname, norm):# {{{
 	positions = genebody_percentile(anno, gene_filter, mRNA_len_cut = 100)
 	fname = None
 	manager = Manager()
@@ -282,7 +295,8 @@ def plot_genebody_profile(conditions, anno, gene_filter, threads, comb, outname,
 	pool = Pool(threads)
 	pool.map(read_gene_function, itertools.izip(list(conditions.keys()), itertools.repeat(positions), itertools.repeat(norm), itertools.repeat(return_dict)))
 	pool.close()
-	pool.join()	
+	pool.join()
+        # If passed comparisons just print those comb.
 	if comb:
 		pyplot.rc('axes', color_cycle=['b','r', 'c', 'm', 'y', 'k', 'gray', "green", "darkred", "skyblue"])
 		combined_profiles = {}
@@ -308,9 +322,9 @@ def plot_genebody_profile(conditions, anno, gene_filter, threads, comb, outname,
 			pyplot.plot( numpy.arange( -100, 200 ), return_dict[key], label=conditions[key])
 	pyplot.xticks([-100, 0, 100, 200], ['-1000', 'TSS', 'TES', "+1000"])
 	pyplot.legend(prop={'size':8})
-	pyplot.savefig(outname+".pdf")
+	pyplot.savefig(outname+".pdf")# }}}
 
-def ConfigSectionMap(section, Config):
+def ConfigSectionMap(section, Config):# {{{
 	dict1 = {}
 	options = Config.options(section)
 	for option in options:
@@ -321,12 +335,12 @@ def ConfigSectionMap(section, Config):
 		except:
 			print("exception on %s!" % option)
 			dict1[option] = None
-	return dict1
+	return dict1# }}}
 
 def get_insert_fun(args):
 	return get_insert(*args)
 
-def get_insert(sam, return_dict):
+def get_insert(sam, return_dict):# {{{
 	cvg = collections.defaultdict(int)
 	test2 = tempfile.NamedTemporaryFile(delete=False)
 	command = "samtools view -h {} -o {}".format(sam, test2.name)
@@ -353,9 +367,9 @@ def get_insert(sam, return_dict):
 	profile = numpy.zeros( 650, dtype='i' ) 
 	for key in cvg:
 		profile[key] = cvg[key]
-	return_dict[sam] = profile
+	return_dict[sam] = profile# }}}
 
-def plot_insert_bed2(sam, bedfile, return_dict):
+def plot_insert_bed2(sam, bedfile, return_dict):# {{{
 	cvg = collections.defaultdict(int)
 	test = tempfile.NamedTemporaryFile(delete = False)
 	test2 = tempfile.NamedTemporaryFile(delete=False)
@@ -387,12 +401,12 @@ def plot_insert_bed2(sam, bedfile, return_dict):
 			profile[i] = cvg[i]
 		else:
 			profile[i] = 0
-	return_dict[sam] = profile
+	return_dict[sam] = profile# }}}
 
 def plot_insert_bed_function(args):
 	return plot_insert_bed2(*args)
 
-def plot_inserts(conditions, threads, output, bedfile, comb):
+def plot_inserts(conditions, threads, output, bedfile, comb): # {{{
 	if bedfile:
 		positions = set()
 		manager = Manager()
@@ -438,7 +452,7 @@ def plot_inserts(conditions, threads, output, bedfile, comb):
 		pyplot.axvline(x=294.,color='k',ls='dashed')
 		pyplot.axvline(x=441.,color='k',ls='dashed')
 		pyplot.legend(prop={'size':8})
-		pyplot.savefig(output+".pdf")
+		pyplot.savefig(output+".pdf")# }}}
 
 def reverse_dict(idict):
 	inv_map = {}
@@ -447,7 +461,7 @@ def reverse_dict(idict):
 		inv_map[v].append(k)
 	return inv_map
 
-def read_peaks(bed):
+def read_peaks(bed):# {{{
 	positions = {}
 	c = 0
 	with open(bed) as f:
@@ -458,9 +472,9 @@ def read_peaks(bed):
 			med = round(med/float(2))
 			positions[c] = (word[0], med)
 			c +=  1
-	return positions
+	return positions# }}}
 
-def read_peak_pysam(bam, halfwinwidth, position_dict, norm, return_dict):
+def read_peak_pysam(bam, halfwinwidth, position_dict, norm, return_dict):# {{{
 	profile = numpy.zeros( 2*halfwinwidth, dtype="f" )
 	if norm:
 		constant = 1e-6/float(norm[bam])
@@ -498,12 +512,12 @@ def read_peak_pysam(bam, halfwinwidth, position_dict, norm, return_dict):
 			aggreagated_cvg[i] += tmp[i]
 	for key in aggreagated_cvg:
 		profile[key] = aggreagated_cvg[key]/float(len(position_dict.keys()))
-	return_dict[bam] = profile
+	return_dict[bam] = profile# }}}
 
 def read_peak_function(args):
 	return read_peak_pysam(*args)
 
-def plot_peak_profile(conditions, bed, halfwinwidth, threads, comb, outname, norm):
+def plot_peak_profile(conditions, bed, halfwinwidth, threads, comb, outname, norm):# {{{
 	positions = read_peaks(bed)
 	fname = None
 	manager = Manager()
@@ -536,7 +550,7 @@ def plot_peak_profile(conditions, bed, halfwinwidth, threads, comb, outname, nor
 		for key in return_dict.keys():
 			pyplot.plot( numpy.arange( 0, halfwinwidth*2 ), return_dict[key], label=conditions[key])
 	pyplot.legend(prop={'size':8})
-	pyplot.savefig(outname+".pdf")	
+	pyplot.savefig(outname+".pdf")	# }}}
 
 def main():
 	parser = argparse.ArgumentParser(description='Takes BED files and intersect them with regions, uses TSS regions by default\n')
